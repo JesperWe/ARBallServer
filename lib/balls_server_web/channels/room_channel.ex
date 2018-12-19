@@ -1,5 +1,10 @@
 defmodule BallsServerWeb.RoomChannel do
   use BallsServerWeb, :channel
+  use BallsServerWeb, :view
+  alias BallsServerWeb.BallView
+
+  alias BallsServer.Game
+  alias BallsServer.Game.Ball
 
   def join("room:lobby", payload, socket) do
     if authorized?(payload) do
@@ -22,8 +27,13 @@ defmodule BallsServerWeb.RoomChannel do
     {:noreply, socket}
   end
 
-  def handle_in("update", %{"body" => body}, socket) do
-    broadcast socket, "msg", %{body: body}
+  def handle_in("update", %{"body" => ball_params}, socket) do
+    ball = Game.get_ball!(2)
+
+    with {:ok, %Ball{} = ball} <- Game.update_ball(ball, ball_params) do
+      broadcast socket, "msg", %{body: render_one(ball, BallView, "ball.json")}
+    end
+
     {:noreply, socket}
   end
 
