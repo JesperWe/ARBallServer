@@ -22,6 +22,11 @@ defmodule BallsServerWeb.RoomChannel do
     {:noreply, socket}
   end
 
+  def handle_in("update", %{"body" => body}, socket) do
+    broadcast socket, "msg", %{body: body}
+    {:noreply, socket}
+  end
+
   # Add authorization logic here as required.
   defp authorized?(_payload) do
     true
